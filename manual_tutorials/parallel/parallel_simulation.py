@@ -12,7 +12,6 @@ import os
 
 import steps.mpi
 import steps.mpi.solver as parallel_solver
-import steps.utilities.geom_decompose as gd
 
 MESHFILE = '10x10x100_3363tets.inp'
 RESULT_DIR = "parallel_result"
@@ -94,12 +93,6 @@ def gen_geom():
 m = gen_model()
 g = gen_geom()
 
-###################### Geometry Partitioning ###########################
-
-tet_hosts = gd.linearPartition(g, [1, 1, steps.mpi.nhosts])
-if steps.mpi.rank == 0:
-    gd.validatePartition(g, tet_hosts)
-    gd.printPartitionStat(tet_hosts)
 
 ########################################################################
 # recording
@@ -115,7 +108,7 @@ if steps.mpi.rank == 0:
 rng = srng.create('mt19937', 512)
 rng.initialize(int(time.time()%4294967295))
 
-sim = parallel_solver.TetOpSplit(m, g, rng, parallel_solver.EF_NONE, tet_hosts)
+sim = parallel_solver.TetOpSplit(m, g, rng, parallel_solver.EF_NONE, 1.0)
 
 # Set initial conditions
 sim.setCompCount('comp', 'A', N0A)
